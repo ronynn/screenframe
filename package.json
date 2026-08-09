@@ -1,6 +1,7 @@
 {
-  "name": "mokkup",
-  "version": "0.1.0",
+  "name": "screenframe",
+  "version": "0.1.1",
+  "homepage": "https://ronynn.github.io/screenframe,
   "private": true,
   "dependencies": {
     "@chakra-ui/react": "^1.6.3",
