@@ -1,37 +1,44 @@
-name: Deploy React App to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - main  # Change this if your default branch is different
+    branches: [ "main" ]
+  workflow_dispatch:   # allows manual trigger
 
+# Sets permissions for deployment
 permissions:
-  contents: write  # Ensure this is explicitly set
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment at a time
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          persist-credentials: false  # Important for custom authentication
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 16
-          cache: npm
+          node-version: 18          # LTS; works well with CRA 4
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci                 # faster and stricter (uses package-lock.json)
 
-      - name: Build project
-        run: npm run build
+      - name: Build the project
+        run: npm run build          # creates ./build folder
 
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          branch: gh-pages
-          folder: build
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build      # <-- correct folder for CRA
+          keep_files: false
+          # force_orphan: true      # (optional) clean gh-pages branch each time
