@@ -30,10 +30,12 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci                 # faster and stricter (uses package-lock.json)
-
+        run: npm ci                 # faster and stricter (uses package-lock.json)  
+        
       - name: Build the project
-        run: npm run build          # creates ./build folder
+        run: npm run build
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
