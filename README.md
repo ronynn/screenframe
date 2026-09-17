@@ -1,19 +1,32 @@
 
-![facebook-preview](https://user-images.githubusercontent.com/45261205/125671068-9163d17e-cf82-493d-b47b-727de2967abe.jpg)
+ScreenFrame enables you to display your screenshots and images as if in a desktop background or with phone bezels for a unique eyecatching look.
 
-Mokkup is a React application for glowing up images, for social media or your portfolio.
+### Features 
 
-**Currently featuring**
 - Prebuilt gradient picks
-- shadow picker
+- Shadow picker
 - Device wrappers
 
-**Tech Stack**
+<div align="center">
+  <img src="fastlane/1.jpg" alt="Screenshot 1" width="45%">
+  <img src="fastlane/2.jpg" alt="Screenshot 2" width="45%">
+</div>
+
+ScreenFrame is a vanilla rewrite of Mokkup which is a React application for glowing up images, for social media or your portfolio.
+
+
+### Original Tech Stack
+
 - React
 - TypeScript
 - Chakra UI
 - Jest
 
-# Example - Twitter post 1200 x 630
-![image](https://user-images.githubusercontent.com/45261205/126049672-4114796d-b51b-4171-b184-387a367035f3.png)
+![desktop](fastlane/3.jpg)
 
+
+ScreenFrame is being developed under the GPL v3 License.
+
+Join us in our [telegram](https://t.me/karuiFOSS) or on discord, reddit.
+
+Give this project a 🌟 if you liked it.

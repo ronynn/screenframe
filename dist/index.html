@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ScreenFrame — Retro Mockup Studio</title>
+<style>
+:root{--ink:#27232b;--paper:#f7f1df;--panel:#fffaf0;--muted:#766e63;--line:#332e2b;--pink:#f6b6c8;--yellow:#f6d98b;--blue:#a9d7e8;--green:#b9d9b0;--purple:#c9b7e8;--shadow:6px 6px 0 var(--line)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--paper);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+body{background-image:radial-gradient(#d7cdb9 1px,transparent 1px);background-size:14px 14px}
+button,input,select{font:inherit}
+button{cursor:pointer}
+img[hidden],iframe[hidden]{display:none !important}
+.app{max-width:1500px;margin:auto;padding:22px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;border:3px solid var(--line);background:var(--panel);box-shadow:var(--shadow);padding:14px 18px;margin-bottom:24px}
+.logo{font-weight:1000;letter-spacing:-2px;font-size:26px;text-transform:uppercase}
+.logo small{font-size:11px;letter-spacing:1px;display:block;color:var(--muted);margin-top:2px}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.layout{display:grid;grid-template-columns:390px minmax(0,1fr);gap:26px;align-items:start}
+.sidebar{display:grid;gap:14px}
+.card{border:3px solid var(--line);background:var(--panel);box-shadow:var(--shadow);padding:16px}
+.card h2{font-size:14px;text-transform:uppercase;letter-spacing:1px;margin:0 0 13px;padding-bottom:8px;border-bottom:2px dashed #a69b8c}
+.upload{border:3px dashed var(--line);background:var(--yellow);padding:22px;text-align:center}
+.upload strong{display:block;font-size:18px;text-transform:uppercase}
+.upload span{display:block;color:#5f564d;font-size:12px;margin:6px 0 14px}
+.btn{border:2px solid var(--line);background:#fffdf6;color:var(--ink);padding:9px 12px;box-shadow:3px 3px 0 var(--line);font-weight:800}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--line)}
+.btn.primary{background:var(--pink)}
+.btn.blue{background:var(--blue)}
+.btn.green{background:var(--green)}
+.btn.purple{background:var(--purple)}
+.btn.small{padding:6px 9px;font-size:12px}
+.row{display:flex;gap:8px;align-items:center}
+.row.between{justify-content:space-between}
+.field{display:grid;gap:5px;margin:9px 0}
+.field label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.7px;display:flex;justify-content:space-between}
+input[type=text],input[type=number],select{width:100%;border:2px solid var(--line);background:#fffdf6;padding:8px;outline:none}
+input[type=color]{width:46px;height:35px;padding:2px;border:2px solid var(--line);background:#fff}
+input[type=range]{width:100%;accent-color:#332e2b}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:12px}
+.tab{border:2px solid var(--line);padding:8px 4px;background:#eee5d6;font-size:11px;font-weight:900;text-transform:uppercase}
+.tab.active{background:var(--blue)}
+.panel{display:none}
+.panel.active{display:block}
+.palette{display:flex;gap:7px;margin:8px 0}
+.palette input{flex:1;min-width:0}
+.direction-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.dir{border:2px solid var(--line);background:#fffdf6;padding:7px;font-weight:900}
+.dir.active{background:var(--yellow)}
+.preset-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-height:300px;overflow:auto}
+.preset{height:62px;border:2px solid var(--line);padding:4px;text-align:left;background:#fffdf6}
+.preset i{display:block;height:34px;border:1px solid #332e2b;margin-bottom:4px}
+.preset span{font-size:8px;font-weight:900;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.design-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.design{border:2px solid var(--line);background:#fffdf6;padding:99px 9px;text-align:left}
+.design strong{font-size:11px;display:block}
+.design small{font-size:9px;color:var(--muted)}
+.toggle{display:flex;align-items:center;justify-content:space-between;border:2px solid #b5aa9a;padding:8px;margin:5px 0;background:#fffdf6;font-size:11px;font-weight:800}
+.toggle input{accent-color:#332e2b}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.preview-area{position:sticky;top:20px;min-height:500px;border:3px solid var(--line);background:#ddd0bb;box-shadow:var(--shadow);overflow:hidden}
+.preview-head{height:48px;border-bottom:3px solid var(--line);background:#fffaf0;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:11px;font-weight:900;text-transform:uppercase}
+.stage{min-height:550px;height:calc(100vh - 125px);display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden;position:relative}
+.artboard{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;transition:transform .15s ease-out;transform-origin:center center}
+.device{position:relative;display:flex;flex-direction:column;transition:all .2s ease}
+.device.none{background:transparent;border:none;box-shadow:none;border-radius:0}
+.device.browser{background:#ffffff;border:2px solid #222222;border-radius:0;overflow:hidden}
+.device.bezel{background:#111111;border:12px solid #111111;border-radius:36px;box-shadow:0 10px 30px rgba(0,0,0,0.3)}
+.browserbar{height:36px;border-bottom:2px solid #222222;display:flex;align-items:center;padding:0 10px;gap:8px;background:#f1f1f1;flex-shrink:0}
+.browser-dots{display:flex;gap:5px;margin-right:4px}
+.browser-dots i{width:9px;height:9px;border:1px solid #222222;border-radius:50%;background:#ed8d82}
+.browser-dots i:nth-child(2){background:#ead36e}
+.browser-dots i:nth-child(3){background:#8fc58c}
+.browser-url{height:22px;flex:1;border:1px solid #aaaaaa;background:#ffffff;padding:3px 8px;font:10px Arial;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:0;display:flex;align-items:center}
+.browser-menu{font-weight:900;font-size:14px;cursor:default}
+.phone-notch{display:none;width:90px;height:14px;background:#000000;border-radius:0 0 10px 10px;position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:10}
+.phone-homebar{display:none;width:110px;height:4px;background:#ffffff;border-radius:2px;position:absolute;bottom:6px;left:50%;transform:translateX(-50%);z-index:10;opacity:0.6}
+.device.bezel .phone-notch,.device.bezel .phone-homebar{display:block}
+.device-screen{position:relative;width:100%;height:100%;flex:1;display:block;overflow:hidden;border-radius:0}
+.device.bezel .device-screen{border-radius:24px}
+.device.browser .device-screen{border-radius:0}
+.device-screen img,.device-screen iframe{width:100%;height:100%;display:block;background:#ffffff;border:none;object-fit:cover;border-radius:0}
+.iframe-note{font-size:9px;color:var(--muted);margin-top:6px}
+.footer{padding:22px 2px;text-align:center;font-size:10px;color:var(--muted)}
+@media(max-width:950px){.layout{grid-template-columns:1fr}.preview-area{position:relative;top:0;min-height:420px}.stage{height:55vh;min-height:380px}}
+@media(max-width:600px){.app{padding:10px}.topbar{align-items:flex-start;flex-direction:column}.layout{gap:16px}.stage{padding:10px;height:50vh;min-height:320px}.two{grid-template-columns:1fr}.preset-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="logo">ScreenFrame<small>retro mockup studio / standalone edition</small></div>
+    <div class="top-actions">
+      <button class="btn small" id="randomize">Randomize</button>
+      <button class="btn small" id="reset">Reset</button>
+      <button class="btn small primary" id="download">Export PNG</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="card">
+        <div class="upload">
+          <strong>Drop an image</strong>
+          <span>PNG, JPG or GIF — or use a website URL below</span>
+          <button class="btn primary" id="uploadBtn">Choose image</button>
+          <input id="file" type="file" accept="image/png,image/jpeg,image/gif" hidden>
+        </div>
+        <div class="field">
+          <label>Website / iframe URL</label>
+          <input id="url" type="text" placeholder="https://example.com">
+          <button class="btn blue" id="loadUrl">Show website in frame</button>
+          <div class="iframe-note">Some sites disable iframe embedding with browser security headers.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Background</h2>
+        <div class="tabs">
+          <button class="tab active" data-tab="presets">Presets</button>
+          <button class="tab" data-tab="designs">Auto CSS</button>
+          <button class="tab" data-tab="manual">Manual</button>
+        </div>
+        <div class="panel active" id="presets">
+          <div class="field"><input id="gradientSearch" type="text" placeholder="Search 380+ presets..."></div>
+          <div class="preset-grid" id="presetsGrid"></div>
+        </div>
+        <div class="panel" id="designs">
+          <div class="design-grid">
+            <button class="design" data-design="dominant"><strong>Dominant wash</strong><small>Image palette → soft CSS blend</small></button>
+            <button class="design" data-design="radial"><strong>Radial glow</strong><small>Sampled color orbs</small></button>
+            <button class="design" data-design="mesh"><strong>Color mesh</strong><small>Multi-stop layered gradients</small></button>
+            <button class="design" data-design="duotone"><strong>Duotone</strong><small>Contrast pair from image</small></button>
+            <button class="design" data-design="aurora"><strong>Aurora</strong><small>Animated-feel static bands</small></button>
+            <button class="design" data-design="paper"><strong>Paper dots</strong><small>Pastel texture algorithm</small></button>
+            <button class="design" data-design="grid"><strong>Retro grid</strong><small>Perspective-inspired CSS</small></button>
+            <button class="design" data-design="sunset"><strong>Poster sunset</strong><small>Palette + sun + horizon</small></button>
+          </div>
+        </div>
+        <div class="panel" id="manual">
+          <div class="palette" id="palette"></div>
+          <div class="direction-grid">
+            <button class="dir" data-dir="135deg">↘</button><button class="dir" data-dir="180deg">→</button>
+            <button class="dir" data-dir="225deg">↗</button><button class="dir" data-dir="90deg">↓</button>
+          </div>
+          <div class="field"><label>Custom CSS background</label><input id="cssBg" type="text" placeholder="linear-gradient(135deg,#...,#...)"><button class="btn green" id="applyCss">Apply CSS</button></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Frame Type</h2>
+        <div class="two">
+          <button class="btn" data-device="none">No frame</button>
+          <button class="btn" data-device="browser">Browser</button>
+        </div>
+        <button class="btn" data-device="bezel" style="width:100%;margin-top:7px">Bezel / phone</button>
+        <div id="browserOptions">
+          <div class="toggle">Dark browser chrome <input id="darkBrowser" type="checkbox"></div>
+          <div class="toggle">Stealth buttons <input id="stealth" type="checkbox" checked></div>
+          <div class="toggle">Hide URL bar <input id="hideBar" type="checkbox"></div>
+          <div class="toggle">Hide menu <input id="hideMenu" type="checkbox"></div>
+        </div>
+        <div id="bezelOptions" class="field" style="display:none"><label>Bezel color</label><input id="bezelColor" type="color" value="#111111"></div>
+      </section>
+
+      <section class="card">
+        <h2>Canvas Size</h2>
+        <div class="field">
+          <label>Canvas Width <span id="valWidth">1200 px</span></label>
+          <input id="width" type="range" min="400" max="3500" value="1200">
+        </div>
+        <div class="field">
+          <label>Canvas Height <span id="valHeight">630 px</span></label>
+          <input id="height" type="range" min="300" max="3500" value="630">
+        </div>
+        <div class="field"><label>Canvas Presets</label>
+          <select id="dimensionPreset">
+            <option value="1200x630">Twitter / X post — 1200 × 630</option>
+            <option value="1080x1080">Instagram post — 1080 × 1080</option>
+            <option value="1080x1920">Instagram story — 1080 × 1920</option>
+            <option value="original">Match image dimensions</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Device Window Size</h2>
+        <div class="field">
+          <label>Device Width <span id="valDevWidth">900 px</span></label>
+          <input id="devWidth" type="range" min="100" max="3000" value="900">
+        </div>
+        <div class="field">
+          <label>Device Height <span id="valDevHeight">560 px</span></label>
+          <input id="devHeight" type="range" min="100" max="3000" value="560">
+        </div>
+        <div class="field"><label>Image Fitting</label>
+          <select id="fitMode">
+            <option value="cover">Fill / Cover (No borders)</option>
+            <option value="contain">Contain (Show whole image)</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Shadow</h2>
+        <div class="two">
+          <div class="field"><label>X</label><input id="sx" type="number" value="0"></div>
+          <div class="field"><label>Y</label><input id="sy" type="number" value="0"></div>
+          <div class="field"><label>Blur</label><input id="blur" type="number" value="55" min="0"></div>
+          <div class="field"><label>Spread</label><input id="spread" type="number" value="5"></div>
+        </div>
+        <div class="field"><label>Shadow color</label><input id="shadowColor" type="color" value="#545252"></div>
+      </section>
+    </aside>
+
+    <section class="preview-area">
+      <div class="preview-head"><span>Live canvas / <span id="sizeLabel">1200 × 630</span></span><span id="modeLabel">image</span></div>
+      <div class="stage" id="stage">
+        <div class="artboard" id="artboard">
+          <div class="device browser" id="device">
+            <div class="browserbar" id="browserbar">
+              <div class="browser-dots" id="browserDots"><i></i><i></i><i></i></div>
+              <div class="browser-url" id="browserUrl">https://example.com</div>
+              <div class="browser-menu" id="browserMenu">☰</div>
+            </div>
+            <div class="phone-notch" id="phoneNotch"></div>
+            <div class="device-screen" id="deviceScreen">
+              <img id="previewImage" alt="Mockup preview">
+              <iframe id="previewFrame" title="Website preview" hidden></iframe>
+            </div>
+            <div class="phone-homebar" id="phoneHomebar"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div class="footer">ScreenFrame • standalone retro mockup studio</div>
+</div>
+
+<script>
+// Section: Gradients Data
+const GRADIENTS = [{"name":"Omolon","colors":["#091E3A","#2F80ED","#2D9EE0"]},{"name":"Farhan","colors":["#9400D3","#4B0082"]},{"name":"Purple","colors":["#c84e89","#F15F79"]},{"name":"Ibtesam","colors":["#00F5A0","#00D9F5"]},{"name":"Radioactive Heat","colors":["#F7941E","#72C6EF","#00A651"]},{"name":"The Sky And The Sea","colors":["#F7941E","#004E8F"]},{"name":"From Ice To Fire","colors":["#72C6EF","#004E8F"]},{"name":"Blue & Orange","colors":["#FD8112","#0085CA"]},{"name":"Purple Dream","colors":["#bf5ae0","#a811da"]},{"name":"Blu","colors":["#00416A","#E4E5E6"]},{"name":"Summer Breeze","colors":["#fbed96","#abecd6"]},{"name":"Ver","colors":["#FFE000","#799F0C"]},{"name":"Ver Black","colors":["#F7F8F8","#ACBB78"]},{"name":"Combi","colors":["#00416A","#799F0C","#FFE000"]},{"name":"Anwar","colors":["#334d50","#cbcaa5"]},{"name":"Bluelagoo","colors":["#0052D4","#4364F7","#6FB1FC"]},{"name":"Lunada","colors":["#5433FF","#20BDFF","#A5FECB"]},{"name":"Reaqua","colors":["#799F0C","#ACBB78"]},{"name":"Mango","colors":["#ffe259","#ffa751"]},{"name":"Bupe","colors":["#00416A","#E4E5E6"]},{"name":"Rea","colors":["#FFE000","#799F0C"]},{"name":"Windy","colors":["#acb6e5","#86fde8"]},{"name":"Royal Blue","colors":["#536976","#292E49"]},{"name":"Royal Blue + Petrol","colors":["#BBD2C5","#536976","#292E49"]},{"name":"Copper","colors":["#B79891","#94716B"]},{"name":"Anamnisar","colors":["#9796f0","#fbc7d4"]},{"name":"Petrol","colors":["#BBD2C5","#536976"]},{"name":"Sky","colors":["#076585","#fff"]},{"name":"Sel","colors":["#00467F","#A5CC82"]},{"name":"Afternoon","colors":["#000C40","#607D8B"]},{"name":"Skyline","colors":["#1488CC","#2B32B2"]},{"name":"DIMIGO","colors":["#ec008c","#fc6767"]},{"name":"Purple Love","colors":["#cc2b5e","#753a88"]},{"name":"Sexy Blue","colors":["#2193b0","#6dd5ed"]},{"name":"Blooker20","colors":["#e65c00","#F9D423"]},{"name":"Sea Blue","colors":["#2b5876","#4e4376"]},{"name":"Nimvelo","colors":["#314755","#26a0da"]},{"name":"Hazel","colors":["#77A1D3","#79CBCA","#E684AE"]},{"name":"Noon to Dusk","colors":["#ff6e7f","#bfe9ff"]},{"name":"YouTube","colors":["#e52d27","#b31217"]},{"name":"Cool Brown","colors":["#603813","#b29f94"]},{"name":"Harmonic Energy","colors":["#16A085","#F4D03F"]},{"name":"Playing with Reds","colors":["#D31027","#EA384D"]},{"name":"Sunny Days","colors":["#EDE574","#E1F5C4"]},{"name":"Green Beach","colors":["#02AAB0","#00CDAC"]},{"name":"Intuitive Purple","colors":["#DA22FF","#9733EE"]},{"name":"Emerald Water","colors":["#348F50","#56B4D3"]},{"name":"Lemon Twist","colors":["#3CA55C","#B5AC49"]},{"name":"Monte Carlo","colors":["#CC95C0","#DBD4B4","#7AA1D2"]},{"name":"Horizon","colors":["#003973","#E5E5BE"]},{"name":"Rose Water","colors":["#E55D87","#5FC3E4"]},{"name":"Frozen","colors":["#403B4A","#E7E9BB"]},{"name":"Mango Pulp","colors":["#F09819","#EDDE5D"]},{"name":"Bloody Mary","colors":["#FF512F","#DD2476"]},{"name":"Aubergine","colors":["#AA076B","#61045F"]},{"name":"Aqua Marine","colors":["#1A2980","#26D0CE"]},{"name":"Sunrise","colors":["#FF512F","#F09819"]},{"name":"Purple Paradise","colors":["#1D2B64","#F8CDDA"]},{"name":"Stripe","colors":["#1FA2FF","#12D8FA","#A6FFCB"]},{"name":"Sea Weed","colors":["#4CB8C4","#3CD3AD"]},{"name":"Pinky","colors":["#DD5E89","#F7BB97"]},{"name":"Cherry","colors":["#EB3349","#F45C43"]},{"name":"Mojito","colors":["#1D976C","#93F9B9"]},{"name":"Juicy Orange","colors":["#FF8008","#FFC837"]},{"name":"Mirage","colors":["#16222A","#3A6073"]},{"name":"Steel Gray","colors":["#1F1C2C","#928DAB"]},{"name":"Kashmir","colors":["#614385","#516395"]},{"name":"Electric Violet","colors":["#4776E6","#8E54E9"]},{"name":"Venice Blue","colors":["#085078","#85D8CE"]},{"name":"Bora Bora","colors":["#2BC0E4","#EAECC6"]},{"name":"Moss","colors":["#134E5E","#71B280"]},{"name":"Shroom Haze","colors":["#5C258D","#4389A2"]},{"name":"Mystic","colors":["#757F9A","#D7DDE8"]},{"name":"Midnight City","colors":["#232526","#414345"]},{"name":"Sea Blizz","colors":["#1CD8D2","#93EDC7"]},{"name":"Opa","colors":["#3D7EAA","#FFE47A"]},{"name":"Titanium","colors":["#283048","#859398"]},{"name":"Mantle","colors":["#24C6DC","#514A9D"]},{"name":"Dracula","colors":["#DC2424","#4A569D"]},{"name":"Peach","colors":["#ED4264","#FFEDBC"]},{"name":"Moonrise","colors":["#DAE2F8","#D6A4A4"]},{"name":"Clouds","colors":["#ECE9E6","#FFFFFF"]},{"name":"Stellar","colors":["#7474BF","#348AC7"]},{"name":"Bourbon","colors":["#EC6F66","#F3A183"]},{"name":"Calm Darya","colors":["#5f2c82","#49a09d"]},{"name":"Influenza","colors":["#C04848","#480048"]},{"name":"Shrimpy","colors":["#e43a15","#e65245"]},{"name":"Army","colors":["#414d0b","#727a17"]},{"name":"Miaka","colors":["#FC354C","#0ABFBC"]},{"name":"Pinot Noir","colors":["#4b6cb7","#182848"]},{"name":"Day Tripper","colors":["#f857a6","#ff5858"]},{"name":"Namn","colors":["#a73737","#7a2828"]},{"name":"Blurry Beach","colors":["#d53369","#cbad6d"]},{"name":"Vasily","colors":["#e9d362","#333333"]},{"name":"A Lost Memory","colors":["#DE6262","#FFB88C"]},{"name":"Petrichor","colors":["#666600","#999966"]},{"name":"Jonquil","colors":["#FFEEEE","#DDEFBB"]},{"name":"Sirius Tamed","colors":["#EFEFBB","#D4D3DD"]},{"name":"Kyoto","colors":["#c21500","#ffc500"]},{"name":"Misty Meadow","colors":["#215f00","#e4e4d9"]},{"name":"Aqualicious","colors":["#50C9C3","#96DEDA"]},{"name":"Moor","colors":["#616161","#9bc5c3"]},{"name":"Almost","colors":["#ddd6f3","#faaca8"]},{"name":"Forever Lost","colors":["#5D4157","#A8CABA"]},{"name":"Winter","colors":["#E6DADA","#274046"]},{"name":"Nelson","colors":["#f2709c","#ff9472"]},{"name":"Autumn","colors":["#DAD299","#B0DAB9"]},{"name":"Candy","colors":["#D3959B","#BFE6BA"]},{"name":"Reef","colors":["#00d2ff","#3a7bd5"]},{"name":"The Strain","colors":["#870000","#190A05"]},{"name":"Dirty Fog","colors":["#B993D6","#8CA6DB"]},{"name":"Earthly","colors":["#649173","#DBD5A4"]},{"name":"Virgin","colors":["#C9FFBF","#FFAFBD"]},{"name":"Ash","colors":["#606c88","#3f4c6b"]},{"name":"Cherry blossoms","colors":["#FBD3E9","#BB377D"]},{"name":"Parklife","colors":["#ADD100","#7B920A"]},{"name":"Dance To Forget","colors":["#FF4E50","#F9D423"]},{"name":"Starfall","colors":["#F0C27B","#4B1248"]},{"name":"Red Mist","colors":["#000000","#e74c3c"]},{"name":"Teal Love","colors":["#AAFFA9","#11FFBD"]},{"name":"Neon Life","colors":["#B3FFAB","#12FFF7"]},{"name":"Man of Steel","colors":["#780206","#061161"]},{"name":"Amethyst","colors":["#9D50BB","#6E48AA"]},{"name":"Cheer Up Emo Kid","colors":["#556270","#FF6B6B"]},{"name":"Shore","colors":["#70e1f5","#ffd194"]},{"name":"Facebook Messenger","colors":["#00c6ff","#0072ff"]},{"name":"SoundCloud","colors":["#fe8c00","#f83600"]},{"name":"Behongo","colors":["#52c234","#061700"]},{"name":"ServQuick","colors":["#485563","#29323c"]},{"name":"Friday","colors":["#83a4d4","#b6fbff"]},{"name":"Martini","colors":["#FDFC47","#24FE41"]},{"name":"Metallic Toad","colors":["#abbaab","#ffffff"]},{"name":"Between The Clouds","colors":["#73C8A9","#373B44"]},{"name":"Crazy Orange I","colors":["#D38312","#A83279"]},{"name":"Hersheys","colors":["#1e130c","#9a8478"]},{"name":"Talking To Mice Elf","colors":["#948E99","#2E1437"]},{"name":"Purple Bliss","colors":["#360033","#0b8793"]},{"name":"Predawn","colors":["#FFA17F","#00223E"]},{"name":"Endless River","colors":["#43cea2","#185a9d"]},{"name":"Pastel Orange at the Sun","colors":["#ffb347","#ffcc33"]},{"name":"Twitch","colors":["#6441A5","#2a0845"]},{"name":"Atlas","colors":["#FEAC5E","#C779D0","#4BC0C8"]},{"name":"Instagram","colors":["#833ab4","#fd1d1d","#fcb045"]},{"name":"Flickr","colors":["#ff0084","#33001b"]},{"name":"Vine","colors":["#00bf8f","#001510"]},{"name":"Turquoise flow","colors":["#136a8a","#267871"]},{"name":"Portrait","colors":["#8e9eab","#eef2f3"]},{"name":"Virgin America","colors":["#7b4397","#dc2430"]},{"name":"Koko Caramel","colors":["#D1913C","#FFD194"]},{"name":"Fresh Turboscent","colors":["#F1F2B5","#135058"]},{"name":"Green to dark","colors":["#6A9113","#141517"]},{"name":"Ukraine","colors":["#004FF9","#FFF94C"]},{"name":"Curiosity blue","colors":["#525252","#3d72b4"]},{"name":"Dark Knight","colors":["#BA8B02","#181818"]},{"name":"Piglet","colors":["#ee9ca7","#ffdde1"]},{"name":"Lizard","colors":["#304352","#d7d2cc"]},{"name":"Sage Persuasion","colors":["#CCCCB2","#757519"]},{"name":"Between Night and Day","colors":["#2c3e50","#3498db"]},{"name":"Timber","colors":["#fc00ff","#00dbde"]},{"name":"Passion","colors":["#e53935","#e35d5b"]},{"name":"Clear Sky","colors":["#005C97","#363795"]},{"name":"Master Card","colors":["#f46b45","#eea849"]},{"name":"Back To Earth","colors":["#00C9FF","#92FE9D"]},{"name":"Deep Purple","colors":["#673AB7","#512DA8"]},{"name":"Little Leaf","colors":["#76b852","#8DC26F"]},{"name":"Netflix","colors":["#8E0E00","#1F1C18"]},{"name":"Light Orange","colors":["#FFB75E","#ED8F03"]},{"name":"Green and Blue","colors":["#c2e59c","#64b3f4"]},{"name":"Poncho","colors":["#403A3E","#BE5869"]},{"name":"Back to the Future","colors":["#C02425","#F0CB35"]},{"name":"Blush","colors":["#B24592","#F15F79"]},{"name":"Inbox","colors":["#457fca","#5691c8"]},{"name":"Purplin","colors":["#6a3093","#a044ff"]},{"name":"Pale Wood","colors":["#eacda3","#d6ae7b"]},{"name":"Haikus","colors":["#fd746c","#ff9068"]},{"name":"Pizelex","colors":["#114357","#F29492"]},{"name":"Joomla","colors":["#1e3c72","#2a5298"]},{"name":"Christmas","colors":["#2F7336","#AA3A38"]},{"name":"Minnesota Vikings","colors":["#5614B0","#DBD65C"]},{"name":"Miami Dolphins","colors":["#4DA0B0","#D39D38"]},{"name":"Forest","colors":["#5A3F37","#2C7744"]},{"name":"Nighthawk","colors":["#2980b9","#2c3e50"]},{"name":"Superman","colors":["#0099F7","#F11712"]},{"name":"Suzy","colors":["#834d9b","#d04ed6"]},{"name":"Dark Skies","colors":["#4B79A1","#283E51"]},{"name":"Deep Space","colors":["#000000","#434343"]},{"name":"Decent","colors":["#4CA1AF","#C4E0E5"]},{"name":"Colors Of Sky","colors":["#E0EAFC","#CFDEF3"]},{"name":"Purple White","colors":["#BA5370","#F4E2D8"]},{"name":"Ali","colors":["#ff4b1f","#1fddff"]},{"name":"Alihossein","colors":["#f7ff00","#db36a4"]},{"name":"Shahabi","colors":["#a80077","#66ff00"]},{"name":"Red Ocean","colors":["#1D4350","#A43931"]},{"name":"Tranquil","colors":["#EECDA3","#EF629F"]},{"name":"Transfile","colors":["#16BFFD","#CB3066"]},{"name":"Sylvia","colors":["#ff4b1f","#ff9068"]},{"name":"Sweet Morning","colors":["#FF5F6D","#FFC371"]},{"name":"Politics","colors":["#2196f3","#f44336"]},{"name":"Bright Vault","colors":["#00d2ff","#928DAB"]},{"name":"Solid Vault","colors":["#3a7bd5","#3a6073"]},{"name":"Sunset","colors":["#0B486B","#F56217"]},{"name":"Grapefruit Sunset","colors":["#e96443","#904e95"]},{"name":"Deep Sea Space","colors":["#2C3E50","#4CA1AF"]},{"name":"Dusk","colors":["#2C3E50","#FD746C"]},{"name":"Minimal Red","colors":["#F00000","#DC281E"]},{"name":"Royal","colors":["#141E30","#243B55"]},{"name":"Mauve","colors":["#42275a","#734b6d"]},{"name":"Frost","colors":["#000428","#004e92"]},{"name":"Lush","colors":["#56ab2f","#a8e063"]},{"name":"Firewatch","colors":["#cb2d3e","#ef473a"]},{"name":"Sherbert","colors":["#f79d00","#64f38c"]},{"name":"Blood Red","colors":["#f85032","#e73827"]},{"name":"Sun on the Horizon","colors":["#fceabb","#f8b500"]},{"name":"IIIT Delhi","colors":["#808080","#3fada8"]},{"name":"Jupiter","colors":["#ffd89b","#19547b"]},{"name":"50 Shades of Grey","colors":["#bdc3c7","#2c3e50"]},{"name":"Dania","colors":["#BE93C5","#7BC6CC"]},{"name":"Limeade","colors":["#A1FFCE","#FAFFD1"]},{"name":"Disco","colors":["#4ECDC4","#556270"]},{"name":"Love Couple","colors":["#3a6186","#89253e"]},{"name":"Azure Pop","colors":["#ef32d9","#89fffd"]},{"name":"Nepal","colors":["#de6161","#2657eb"]},{"name":"Cosmic Fusion","colors":["#ff00cc","#333399"]},{"name":"Snapchat","colors":["#fffc00","#ffffff"]},{"name":"Ed's Sunset Gradient","colors":["#ff7e5f","#feb47b"]},{"name":"Brady Brady Fun Fun","colors":["#00c3ff","#ffff1c"]},{"name":"Black Ros\u00e9","colors":["#f4c4f3","#fc67fa"]},{"name":"80's Purple","colors":["#41295a","#2F0743"]},{"name":"Radar","colors":["#A770EF","#CF8BF3","#FDB99B"]},{"name":"Ibiza Sunset","colors":["#ee0979","#ff6a00"]},{"name":"Dawn","colors":["#F3904F","#3B4371"]},{"name":"Mild","colors":["#67B26F","#4ca2cd"]},{"name":"Vice City","colors":["#3494E6","#EC6EAD"]},{"name":"Jaipur","colors":["#DBE6F6","#C5796D"]},{"name":"Jodhpur","colors":["#9CECFB","#65C7F7","#0052D4"]},{"name":"Cocoaa Ice","colors":["#c0c0aa","#1cefff"]},{"name":"EasyMed","colors":["#DCE35B","#45B649"]},{"name":"Rose Colored Lenses","colors":["#E8CBC0","#636FA4"]},{"name":"What lies Beyond","colors":["#F0F2F0","#000C40"]},{"name":"Roseanna","colors":["#FFAFBD","#ffc3a0"]},{"name":"Honey Dew","colors":["#43C6AC","#F8FFAE"]},{"name":"Under the Lake","colors":["#093028","#237A57"]},{"name":"The Blue Lagoon","colors":["#43C6AC","#191654"]},{"name":"Can You Feel The Love Tonight","colors":["#4568DC","#B06AB3"]},{"name":"Very Blue","colors":["#0575E6","#021B79"]},{"name":"Love and Liberty","colors":["#200122","#6f0000"]},{"name":"Orca","colors":["#44A08D","#093637"]},{"name":"Venice","colors":["#6190E8","#A7BFE8"]},{"name":"Pacific Dream","colors":["#34e89e","#0f3443"]},{"name":"Learning and Leading","colors":["#F7971E","#FFD200"]},{"name":"Celestial","colors":["#C33764","#1D2671"]},{"name":"Purplepine","colors":["#20002c","#cbb4d4"]},{"name":"Sha la la","colors":["#D66D75","#E29587"]},{"name":"Mini","colors":["#30E8BF","#FF8235"]},{"name":"Maldives","colors":["#B2FEFA","#0ED2F7"]},{"name":"Cinnamint","colors":["#4AC29A","#BDFFF3"]},{"name":"Html","colors":["#E44D26","#F16529"]},{"name":"Coal","colors":["#EB5757","#000000"]},{"name":"Sunkist","colors":["#F2994A","#F2C94C"]},{"name":"Blue Skies","colors":["#56CCF2","#2F80ED"]},{"name":"Chitty Chitty Bang Bang","colors":["#007991","#78ffd6"]},{"name":"Visions of Grandeur","colors":["#000046","#1CB5E0"]},{"name":"Crystal Clear","colors":["#159957","#155799"]},{"name":"Mello","colors":["#c0392b","#8e44ad"]},{"name":"Compare Now","colors":["#EF3B36","#FFFFFF"]},{"name":"Meridian","colors":["#283c86","#45a247"]},{"name":"Relay","colors":["#3A1C71","#D76D77","#FFAF7B"]},{"name":"Alive","colors":["#CB356B","#BD3F32"]},{"name":"Scooter","colors":["#36D1DC","#5B86E5"]},{"name":"Terminal","colors":["#000000","#0f9b0f"]},{"name":"Telegram","colors":["#1c92d2","#f2fcfe"]},{"name":"Crimson Tide","colors":["#642B73","#C6426E"]},{"name":"Socialive","colors":["#06beb6","#48b1bf"]},{"name":"Subu","colors":["#0cebeb","#20e3b2","#29ffc6"]},{"name":"Broken Hearts","colors":["#d9a7c7","#fffcdc"]},{"name":"Kimoby Is The New Blue","colors":["#396afc","#2948ff"]},{"name":"Dull","colors":["#C9D6FF","#E2E2E2"]},{"name":"Purpink","colors":["#7F00FF","#E100FF"]},{"name":"Orange Coral","colors":["#ff9966","#ff5e62"]},{"name":"Summer","colors":["#22c1c3","#fdbb2d"]},{"name":"King Yna","colors":["#1a2a6c","#b21f1f","#fdbb2d"]},{"name":"Velvet Sun","colors":["#e1eec3","#f05053"]},{"name":"Zinc","colors":["#ADA996","#F2F2F2","#DBDBDB","#EAEAEA"]},{"name":"Hydrogen","colors":["#667db6","#0082c8","#0082c8","#667db6"]},{"name":"Argon","colors":["#03001e","#7303c0","#ec38bc","#fdeff9"]},{"name":"Lithium","colors":["#6D6027","#D3CBB8"]},{"name":"Digital Water","colors":["#74ebd5","#ACB6E5"]},{"name":"Orange Fun","colors":["#fc4a1a","#f7b733"]},{"name":"Rainbow Blue","colors":["#00F260","#0575E6"]},{"name":"Pink Flavour","colors":["#800080","#ffc0cb"]},{"name":"Sulphur","colors":["#CAC531","#F3F9A7"]},{"name":"Selenium","colors":["#3C3B3F","#605C3C"]},{"name":"Delicate","colors":["#D3CCE3","#E9E4F0"]},{"name":"Ohhappiness","colors":["#00b09b","#96c93d"]},{"name":"Lawrencium","colors":["#0f0c29","#302b63","#24243e"]},{"name":"Relaxing red","colors":["#fffbd5","#b20a2c"]},{"name":"Taran Tado","colors":["#23074d","#cc5333"]},{"name":"Bighead","colors":["#c94b4b","#4b134f"]},{"name":"Sublime Vivid","colors":["#FC466B","#3F5EFB"]},{"name":"Sublime Light","colors":["#FC5C7D","#6A82FB"]},{"name":"Pun Yeta","colors":["#108dc7","#ef8e38"]},{"name":"Quepal","colors":["#11998e","#38ef7d"]},{"name":"Sand to Blue","colors":["#3E5151","#DECBA4"]},{"name":"Wedding Day Blues","colors":["#40E0D0","#FF8C00","#FF0080"]},{"name":"Shifter","colors":["#bc4e9c","#f80759"]},{"name":"Red Sunset","colors":["#355C7D","#6C5B7B","#C06C84"]},{"name":"Moon Purple","colors":["#4e54c8","#8f94fb"]},{"name":"Pure Lust","colors":["#333333","#dd1818"]},{"name":"Slight Ocean View","colors":["#a8c0ff","#3f2b96"]},{"name":"eXpresso","colors":["#ad5389","#3c1053"]},{"name":"Shifty","colors":["#636363","#a2ab58"]},{"name":"Vanusa","colors":["#DA4453","#89216B"]},{"name":"Evening Night","colors":["#005AA7","#FFFDE4"]},{"name":"Magic","colors":["#59C173","#a17fe0","#5D26C1"]},{"name":"Margo","colors":["#FFEFBA","#FFFFFF"]},{"name":"Blue Raspberry","colors":["#00B4DB","#0083B0"]},{"name":"Citrus Peel","colors":["#FDC830","#F37335"]},{"name":"Sin City Red","colors":["#ED213A","#93291E"]},{"name":"Rastafari","colors":["#1E9600","#FFF200","#FF0000"]},{"name":"Summer Dog","colors":["#a8ff78","#78ffd6"]},{"name":"Wiretap","colors":["#8A2387","#E94057","#F27121"]},{"name":"Burning Orange","colors":["#FF416C","#FF4B2B"]},{"name":"Ultra Voilet","colors":["#654ea3","#eaafc8"]},{"name":"By Design","colors":["#009FFF","#ec2F4B"]},{"name":"Kyoo Tah","colors":["#544a7d","#ffd452"]},{"name":"Kye Meh","colors":["#8360c3","#2ebf91"]},{"name":"Kyoo Pal","colors":["#dd3e54","#6be585"]},{"name":"Metapolis","colors":["#659999","#f4791f"]},{"name":"Flare","colors":["#f12711","#f5af19"]},{"name":"Witching Hour","colors":["#c31432","#240b36"]},{"name":"Azur Lane","colors":["#7F7FD5","#86A8E7","#91EAE4"]},{"name":"Neuromancer","colors":["#f953c6","#b91d73"]},{"name":"Harvey","colors":["#1f4037","#99f2c8"]},{"name":"Amin","colors":["#8E2DE2","#4A00E0"]},{"name":"Memariani","colors":["#aa4b6b","#6b6b83","#3b8d99"]},{"name":"Yoda","colors":["#FF0099","#493240"]},{"name":"Cool Sky","colors":["#2980B9","#6DD5FA","#FFFFFF"]},{"name":"Dark Ocean","colors":["#373B44","#4286f4"]},{"name":"Evening Sunshine","colors":["#b92b27","#1565C0"]},{"name":"JShine","colors":["#12c2e9","#c471ed","#f64f59"]},{"name":"Moonlit Asteroid","colors":["#0F2027","#203A43","#2C5364"]},{"name":"MegaTron","colors":["#C6FFDD","#FBD786","#f7797d"]},{"name":"Cool Blues","colors":["#2193b0","#6dd5ed"]},{"name":"Piggy Pink","colors":["#ee9ca7","#ffdde1"]},{"name":"Grade Grey","colors":["#bdc3c7","#2c3e50"]},{"name":"Telko","colors":["#F36222","#5CB644","#007FC3"]},{"name":"Zenta","colors":["#2A2D3E","#FECB6E"]},{"name":"Electric Peacock","colors":["#8a2be2","#0000cd","#228b22","#ccff00"]},{"name":"Under Blue Green","colors":["#051937","#004d7a","#008793","#00bf72","#a8eb12"]},{"name":"Lensod","colors":["#6025F5","#FF5555"]},{"name":"Newspaper","colors":["#8a2be2","#ffa500","#f8f8ff"]},{"name":"Dark Blue Gradient","colors":["#2774ae","#002E5D","#002E5D"]},{"name":"Dark Blu Two","colors":["#004680","#4484BA"]},{"name":"Lemon Lime","colors":["#7ec6bc","#ebe717"]},{"name":"Beleko","colors":["#ff1e56","#f9c942","#1e90ff"]},{"name":"Mango Papaya","colors":["#de8a41","#2ada53"]},{"name":"Unicorn Rainbow","colors":["#f7f0ac","#acf7f0","#f0acf7"]},{"name":"Flame","colors":["#ff0000","#fdcf58"]},{"name":"Blue Red","colors":["#36B1C7","#960B33"]},{"name":"Twitter","colors":["#1DA1F2","#009ffc"]},{"name":"Blooze","colors":["#6da6be","#4b859e","#6da6be"]},{"name":"Blue Slate","colors":["#B5B9FF","#2B2C49"]},{"name":"Space Light Green","colors":["#9FA0A8","#5C7852"]},{"name":"Flower","colors":["#DCFFBD","#CC86D1"]},{"name":"Peach Sea","colors":["#E6AE8C","#A8CECF"]},{"name":"Abbas","colors":["#00fff0","#0083fe"]},{"name":"Winter Woods","colors":["#333333","#a2ab58","#A43931"]},{"name":"Ameena","colors":["#0c0c6d","#de512b","#98d0c1","#5bb226","#023c0d"]},{"name":"Emerald Sea","colors":["#05386b","#5cdb95"]},{"name":"Bleem","colors":["#4284DB","#29EAC4"]},{"name":"Coffee Gold","colors":["#554023","#c99846"]},{"name":"Compass","colors":["#516b8b","#056b3b"]},{"name":"Andreuzza's","colors":["#D70652","#FF025E"]},{"name":"Moonwalker","colors":["#152331","#000000"]},{"name":"Whinehouse","colors":["#f7f7f7","#b9a0a0","#794747","#4e2020","#111111"]},{"name":"Hyper Blue","colors":["#59CDE9","#0A2A88"]},{"name":"Racker","colors":["#EB0000","#95008A","#3300FC"]},{"name":"Neon Green","colors":["#81ff8a","#64965e"]},{"name":"Dusty Grass","colors":["#d4fc79","#96e6a1"]},{"name":"Visual Blue","colors":["#003d4d","#00c996"]}]
+
+// Section: App Helpers & State
+const $ = id => document.getElementById(id)
+const state =
+{
+  colors: ["#536976", "#292E49"],
+  direction: "135deg",
+  device: "browser",
+  mode: "image",
+  image: null,
+  imageURL: null,
+  original: null,
+  design: null
+}
+const defaultImage = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560"><rect width="900" height="560" fill="#f2e8d5"/><rect x="65" y="65" width="770" height="430" fill="#fffaf0" stroke="#332e2b" stroke-width="8"/><circle cx="150" cy="145" r="34" fill="#f6b6c8"/><rect x="220" y="122" width="360" height="25" rx="5" fill="#332e2b"/><rect x="150" y="215" width="600" height="20" rx="5" fill="#c9b7e8"/><rect x="150" y="265" width="480" height="20" rx="5" fill="#a9d7e8"/><rect x="150" y="350" width="220" height="80" rx="8" fill="#b9d9b0"/><rect x="405" y="350" width="220" height="80" rx="8" fill="#f6d98b"/></svg>`)
+state.imageURL = defaultImage
+
+// Section: Styling & Palette Management
+function gradient(colors, dir = state.direction)
+{
+  return `linear-gradient(${dir},${colors.join(",")})`
+}
+
+function setBackground(css)
+{
+  $("artboard").style.background = css
+}
+
+function setColors(colors)
+{
+  state.colors = colors.slice(0, 4)
+  state.design = null
+  setBackground(gradient(state.colors))
+  renderPalette()
+}
+
+function renderPalette()
+{
+  $("palette").innerHTML = ""
+  state.colors.forEach((c, i) =>
+  {
+    const wrap = document.createElement("div")
+    wrap.style.flex = "1"
+    wrap.innerHTML = `<input type="color" value="${c}" title="Color ${i + 1}">`
+    wrap.firstChild.oninput = e =>
+    {
+      state.colors[i] = e.target.value
+      state.design = null
+      setBackground(gradient(state.colors))
+    }
+    $("palette").appendChild(wrap)
+  })
+}
+
+function renderPresets()
+{
+  const q = $("gradientSearch").value.toLowerCase()
+  const grid = $("presetsGrid")
+  grid.innerHTML = ""
+  GRADIENTS.filter(g => g.name.toLowerCase().includes(q)).forEach(g =>
+  {
+    const b = document.createElement("button")
+    b.className = "preset"
+    b.innerHTML = `<i style="background:${gradient(g.colors)}"></i><span>${g.name}</span>`
+    b.onclick = () => setColors(g.colors)
+    grid.appendChild(b)
+  })
+}
+
+function switchTab(name)
+{
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x.dataset.tab === name))
+  document.querySelectorAll(".panel").forEach(x => x.classList.toggle("active", x.id === name))
+}
+document.querySelectorAll(".tab").forEach(x => x.onclick = () => switchTab(x.dataset.tab))
+$("gradientSearch").oninput = renderPresets
+
+// Section: Color Sampling & Auto CSS
+function sampleImage()
+{
+  return new Promise(resolve =>
+  {
+    if (!state.image)
+    {
+      resolve(["#f6b6c8", "#a9d7e8", "#f6d98b"])
+      return
+    }
+    const img = new Image()
+    img.onload = () =>
+    {
+      const c = document.createElement("canvas")
+      const ctx = c.getContext("2d")
+      const w = 32
+      const h = 32
+      c.width = w
+      c.height = h
+      ctx.drawImage(img, 0, 0, w, h)
+      const d = ctx.getImageData(0, 0, w, h).data
+      const bins = {}
+      for (let i = 0; i < d.length; i += 4)
+      {
+        if (d[i + 3] < 100) continue
+        const r = Math.round(d[i] / 32) * 32
+        const g = Math.round(d[i + 1] / 32) * 32
+        const b = Math.round(d[i + 2] / 32) * 32
+        const k = `${r},${g},${b}`
+        bins[k] = (bins[k] || 0) + 1
+      }
+      const colors = Object.entries(bins).sort((a, b) => b[1] - a[1]).slice(0, 7).map(x =>
+      {
+        const [r, g, b] = x[0].split(",").map(Number)
+        return rgbHex(r, g, b)
+      })
+      resolve(colors.length ? colors : ["#f6b6c8", "#a9d7e8", "#f6d98b"])
+    }
+    img.src = state.imageURL
+  })
+}
+
+function rgbHex(r, g, b)
+{
+  return "#" + [r, g, b].map(x => Math.max(0, Math.min(255, x)).toString(16).padStart(2, "0")).join("")
+}
+
+function mix(a, b, t)
+{
+  const A = a.match(/\w\w/g).map(x => parseInt(x, 16))
+  const B = b.match(/\w\w/g).map(x => parseInt(x, 16))
+  return rgbHex(...A.map((v, i) => Math.round(v + (B[i] - v) * t)))
+}
+
+async function autoDesign(type)
+{
+  const p = await sampleImage()
+  const a = p[0]
+  const b = p[1] || "#a9d7e8"
+  const c = p[2] || "#f6d98b"
+  state.design = type
+  let css = ""
+  if (type === "dominant") css = `linear-gradient(135deg,${mix(a, "#ffffff", .15)},${mix(b, "#ffffff", .28)},${mix(c, "#ffffff", .18)})`
+  if (type === "radial") css = `radial-gradient(circle at 20% 20%,${a} 0,transparent 42%),radial-gradient(circle at 80% 25%,${b} 0,transparent 40%),radial-gradient(circle at 50% 90%,${c} 0,transparent 48%),#f7f1df`
+  if (type === "mesh") css = `radial-gradient(circle at 15% 25%,${a} 0,transparent 38%),radial-gradient(circle at 80% 15%,${b} 0,transparent 42%),radial-gradient(circle at 70% 85%,${c} 0,transparent 45%),linear-gradient(120deg,#fff7eb,#e8e0d2)`
+  if (type === "duotone") css = `linear-gradient(135deg,${a},${mix(b, "#111111", .15)})`
+  if (type === "aurora") css = `linear-gradient(115deg,${a} 0%,transparent 30%),linear-gradient(210deg,${b} 5%,transparent 42%),linear-gradient(330deg,${c} 10%,#f7f1df 65%)`
+  if (type === "paper")
+  {
+    css = `radial-gradient(${mix(a, "#ffffff", .35)} 1px,transparent 1px),linear-gradient(135deg,${mix(a, "#ffffff", .7)},${mix(b, "#ffffff", .75)})`
+    $("artboard").style.backgroundSize = "14px 14px,auto"
+  }
+  else
+  {
+    $("artboard").style.backgroundSize = "auto"
+  }
+  if (type === "grid")
+  {
+    css = `linear-gradient(${a} 1px,transparent 1px),linear-gradient(90deg,${b} 1px,transparent 1px),${mix(c, "#ffffff", .7)}`
+    $("artboard").style.backgroundSize = "32px 32px"
+  }
+  if (type === "sunset") css = `radial-gradient(circle at 50% 40%,${c} 0 12%,transparent 13%),linear-gradient(180deg,${b} 0%,${a} 55%,${mix(a, "#222222", .5)} 100%)`
+  setBackground(css)
+}
+
+document.querySelectorAll("[data-design]").forEach(x => x.onclick = () => autoDesign(x.dataset.design))
+document.querySelectorAll(".dir").forEach(x => x.onclick = () =>
+{
+  state.direction = x.dataset.dir
+  document.querySelectorAll(".dir").forEach(y => y.classList.remove("active"))
+  x.classList.add("active")
+  if (!state.design) setBackground(gradient(state.colors))
+})
+$("applyCss").onclick = () =>
+{
+  state.design = "custom"
+  setBackground($("cssBg").value || gradient(state.colors))
+}
+
+// Section: Media Loading
+$("uploadBtn").onclick = () => $("file").click()
+$("file").onchange = e =>
+{
+  const f = e.target.files[0]
+  if (!f) return
+  if (!["image/png", "image/jpeg", "image/gif"].includes(f.type))
+  {
+    alert("Please choose a PNG, JPG or GIF.")
+    return
+  }
+  state.mode = "image"
+  state.image = f
+  state.imageURL = URL.createObjectURL(f)
+  $("previewFrame").hidden = true
+  $("previewImage").hidden = false
+  $("modeLabel").textContent = "image"
+  const img = new Image()
+  img.onload = () =>
+  {
+    state.original = { w: img.naturalWidth, h: img.naturalHeight }
+
+    const padW = Math.round(img.naturalWidth * 0.3)
+    const padH = Math.round(img.naturalHeight * 0.3)
+    const canW = img.naturalWidth + Math.max(160, padW)
+    const canH = img.naturalHeight + Math.max(120, padH)
+
+    $("devWidth").max = Math.max(3000, img.naturalWidth)
+    $("devHeight").max = Math.max(3000, img.naturalHeight)
+    $("width").max = Math.max(3500, canW)
+    $("height").max = Math.max(3500, canH)
+
+    $("devWidth").value = img.naturalWidth
+    $("devHeight").value = img.naturalHeight
+    $("width").value = canW
+    $("height").value = canH
+
+    update()
+  }
+  img.src = state.imageURL
+  $("previewImage").src = state.imageURL
+  update()
+}
+
+$("url").oninput = () =>
+{
+  const u = $("url").value.trim()
+  $("browserUrl").textContent = u || "https://example.com"
+}
+
+$("loadUrl").onclick = () =>
+{
+  const u = $("url").value.trim()
+  if (!u) return
+  state.mode = "iframe"
+  $("previewImage").hidden = true
+  $("previewFrame").hidden = false
+  $("previewFrame").src = u
+  $("browserUrl").textContent = u
+  $("modeLabel").textContent = "iframe"
+  update()
+}
+
+// Section: Device Frame Setup
+document.querySelectorAll("[data-device]").forEach(x => x.onclick = () =>
+{
+  state.device = x.dataset.device
+  updateDevice()
+  update()
+})
+$("darkBrowser").onchange = updateDevice
+$("stealth").onchange = updateDevice
+$("hideBar").onchange = updateDevice
+$("hideMenu").onchange = updateDevice
+$("bezelColor").oninput = updateDevice
+
+function updateDevice()
+{
+  document.querySelectorAll("[data-device]").forEach(b =>
+  {
+    b.classList.toggle("blue", b.dataset.device === state.device)
+  })
+
+  const d = $("device")
+  const bar = $("browserbar")
+  d.className = "device " + state.device
+  $("browserOptions").style.display = state.device === "browser" ? "block" : "none"
+  $("bezelOptions").style.display = state.device === "bezel" ? "block" : "none"
+
+  if (state.device === "browser")
+  {
+    bar.style.display = $("hideBar").checked ? "none" : "flex"
+    bar.style.background = $("darkBrowser").checked ? "#353d44" : "#f1f1f1"
+    bar.style.color = $("darkBrowser").checked ? "white" : "black"
+    $("browserUrl").style.display = $("hideBar").checked ? "none" : "flex"
+    $("browserUrl").style.background = $("darkBrowser").checked ? "#3d464f" : "white"
+    $("browserUrl").style.color = $("darkBrowser").checked ? "white" : "black"
+    $("browserMenu").style.display = $("hideMenu").checked ? "none" : "block"
+    $("browserDots").querySelectorAll("i").forEach(i =>
+    {
+      i.style.background = $("stealth").checked ? "#969696" : ""
+    })
+  }
+  else if (state.device === "bezel")
+  {
+    bar.style.display = "none"
+    d.style.borderColor = $("bezelColor").value
+    d.style.background = $("bezelColor").value
+  }
+  else
+  {
+    bar.style.display = "none"
+  }
+}
+
+// Section: Canvas Fit & Layout Update
+function fitArtboard()
+{
+  const stage = $("stage")
+  const artboard = $("artboard")
+  if (!stage || !artboard) return
+  const w = Math.max(100, +$("width").value || 1200)
+  const h = Math.max(100, +$("height").value || 630)
+  const pad = 24
+  const availableW = Math.max(100, stage.clientWidth - pad)
+  const availableH = Math.max(100, stage.clientHeight - pad)
+  const fitScale = Math.min(availableW / w, availableH / h)
+  artboard.style.transform = `scale(${fitScale})`
+}
+
+function update()
+{
+  const w = Math.max(100, +$("width").value || 1200)
+  const h = Math.max(100, +$("height").value || 630)
+  const devW = Math.max(50, +$("devWidth").value || 900)
+  const devH = Math.max(50, +$("devHeight").value || 500)
+  const fitMode = $("fitMode").value
+
+  $("valWidth").textContent = w + " px"
+  $("valHeight").textContent = h + " px"
+  $("valDevWidth").textContent = devW + " px"
+  $("valDevHeight").textContent = devH + " px"
+
+  $("artboard").style.width = w + "px"
+  $("artboard").style.height = h + "px"
+  $("sizeLabel").textContent = `${w} × ${h}`
+
+  const dev = $("device")
+  dev.style.width = devW + "px"
+  dev.style.height = devH + "px"
+
+  $("previewImage").style.objectFit = fitMode
+
+  dev.style.boxShadow = `${$("sx").value || 0}px ${$("sy").value || 0}px ${$("blur").value || 0}px ${$("spread").value || 0}px ${$("shadowColor").value}`
+
+  updateDevice()
+  fitArtboard()
+}
+
+["width", "height", "devWidth", "devHeight", "fitMode", "sx", "sy", "blur", "spread", "shadowColor"].forEach(id => $(id).addEventListener("input", update))
+window.addEventListener("resize", fitArtboard)
+
+$("dimensionPreset").onchange = e =>
+{
+  const v = e.target.value
+  if (v === "original" && state.original)
+  {
+    const padW = Math.round(state.original.w * 0.3)
+    const padH = Math.round(state.original.h * 0.3)
+    $("devWidth").value = state.original.w
+    $("devHeight").value = state.original.h
+    $("width").value = state.original.w + Math.max(160, padW)
+    $("height").value = state.original.h + Math.max(120, padH)
+  }
+  else if (v !== "original")
+  {
+    const [w, h] = v.split("x")
+    $("width").value = w
+    $("height").value = h
+  }
+  update()
+}
+
+$("randomize").onclick = () =>
+{
+  const g = GRADIENTS[Math.floor(Math.random() * GRADIENTS.length)]
+  setColors(g.colors)
+  update()
+}
+$("reset").onclick = () => location.reload()
+
+// Section: PNG Export
+function drawImageFitted(ctx, img, dx, dy, dw, dh, fitMode)
+{
+  if (fitMode === "contain")
+  {
+    const imgRatio = img.naturalWidth / img.naturalHeight
+    const rectRatio = dw / dh
+    let sw = dw
+    let sh = dh
+    let sx = dx
+    let sy = dy
+    if (imgRatio > rectRatio)
+    {
+      sh = dw / imgRatio
+      sy = dy + (dh - sh) / 2
+    }
+    else
+    {
+      sw = dh * imgRatio
+      sx = dx + (dw - sw) / 2
+    }
+    ctx.drawImage(img, sx, sy, sw, sh)
+  }
+  else
+  {
+    const imgRatio = img.naturalWidth / img.naturalHeight
+    const rectRatio = dw / dh
+    let sw = img.naturalWidth
+    let sh = img.naturalHeight
+    let sx = 0
+    let sy = 0
+    if (imgRatio > rectRatio)
+    {
+      sw = img.naturalHeight * rectRatio
+      sx = (img.naturalWidth - sw) / 2
+    }
+    else
+    {
+      sh = img.naturalWidth / rectRatio
+      sy = (img.naturalHeight - sh) / 2
+    }
+    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+  }
+}
+
+async function exportPNG()
+{
+  if (state.mode !== "image")
+  {
+    alert("PNG export is available for image mockups. Iframe content cannot be read by the browser for a canvas export because of cross-origin security.")
+    return
+  }
+  const w = +$("width").value
+  const h = +$("height").value
+  const devW = +$("devWidth").value || 900
+  const devH = +$("devHeight").value || 560
+  const fitMode = $("fitMode").value
+
+  const canvas = document.createElement("canvas")
+  canvas.width = w
+  canvas.height = h
+  const ctx = canvas.getContext("2d")
+
+  if (!ctx.roundRect)
+  {
+    ctx.roundRect = function(x, y, w, h, r)
+    {
+      ctx.rect(x, y, w, h)
+    }
+  }
+
+  const bgCanvas = document.createElement("canvas")
+  bgCanvas.width = w
+  bgCanvas.height = h
+  const bctx = bgCanvas.getContext("2d")
+
+  const colors = state.colors
+  const grad = bctx.createLinearGradient(0, 0, w, h)
+  colors.forEach((c, i) => grad.addColorStop(i / (colors.length - 1 || 1), c))
+  bctx.fillStyle = grad
+  bctx.fillRect(0, 0, w, h)
+  ctx.drawImage(bgCanvas, 0, 0)
+
+  const img = new Image()
+  img.onload = () =>
+  {
+    const x = Math.round((w - devW) / 2)
+    const y = Math.round((h - devH) / 2)
+
+    ctx.save()
+    ctx.shadowColor = $("shadowColor").value
+    ctx.shadowOffsetX = +$("sx").value
+    ctx.shadowOffsetY = +$("sy").value
+    ctx.shadowBlur = +$("blur").value
+
+    if (state.device === "bezel")
+    {
+      const bColor = $("bezelColor").value
+      ctx.fillStyle = bColor
+      ctx.beginPath()
+      ctx.roundRect(x, y, devW, devH, 36)
+      ctx.fill()
+      ctx.restore()
+
+      const innerPad = 12
+      const screenX = x + innerPad
+      const screenY = y + innerPad
+      const screenW = devW - innerPad * 2
+      const screenH = devH - innerPad * 2
+
+      ctx.save()
+      ctx.beginPath()
+      ctx.roundRect(screenX, screenY, screenW, screenH, 24)
+      ctx.clip()
+      drawImageFitted(ctx, img, screenX, screenY, screenW, screenH, fitMode)
+      ctx.restore()
+
+      ctx.fillStyle = "#000000"
+      ctx.beginPath()
+      ctx.roundRect(x + devW / 2 - 45, y + 4, 90, 14, [0, 0, 10, 10])
+      ctx.fill()
+
+      ctx.fillStyle = "#ffffff"
+      ctx.globalAlpha = 0.6
+      ctx.beginPath()
+      ctx.roundRect(x + devW / 2 - 55, y + devH - 12, 110, 4, 2)
+      ctx.fill()
+      ctx.globalAlpha = 1.0
+    }
+    else if (state.device === "browser")
+    {
+      const barH = $("hideBar").checked ? 0 : 36
+      ctx.fillStyle = $("darkBrowser").checked ? "#353d44" : "#f1f1f1"
+      ctx.beginPath()
+      ctx.rect(x, y, devW, devH)
+      ctx.fill()
+      ctx.restore()
+
+      if (!$("hideBar").checked)
+      {
+        const isStealth = $("stealth").checked
+        const dots = ["#ed8d82", "#ead36e", "#8fc58c"]
+        dots.forEach((dotColor, i) =>
+        {
+          ctx.fillStyle = isStealth ? "#969696" : dotColor
+          ctx.beginPath()
+          ctx.arc(x + 15 + i * 14, y + 18, 4.5, 0, Math.PI * 2)
+          ctx.fill()
+        })
+
+        ctx.fillStyle = $("darkBrowser").checked ? "#3d464f" : "#ffffff"
+        ctx.beginPath()
+        ctx.rect(x + 65, y + 7, devW - 105, 22)
+        ctx.fill()
+        ctx.fillStyle = $("darkBrowser").checked ? "#ffffff" : "#333333"
+        ctx.font = "10px Arial"
+        ctx.fillText($("browserUrl").textContent, x + 73, y + 21)
+      }
+
+      ctx.save()
+      ctx.beginPath()
+      ctx.rect(x, y + barH, devW, devH - barH)
+      ctx.clip()
+      drawImageFitted(ctx, img, x, y + barH, devW, devH - barH, fitMode)
+      ctx.restore()
+    }
+    else
+    {
+      ctx.fillStyle = "#ffffff"
+      ctx.fillRect(x, y, devW, devH)
+      ctx.restore()
+      drawImageFitted(ctx, img, x, y, devW, devH, fitMode)
+    }
+
+    const a = document.createElement("a")
+    a.download = "screenframe.png"
+    a.href = canvas.toDataURL("image/png")
+    a.click()
+  }
+  img.src = state.imageURL
+}
+
+$("download").onclick = exportPNG
+
+// Section: Drag & Drop
+$("artboard").ondragover = e =>
+{
+  e.preventDefault()
+  $("artboard").style.outline = "4px dashed #332e2b"
+}
+$("artboard").ondragleave = () => $("artboard").style.outline = ""
+$("artboard").ondrop = e =>
+{
+  e.preventDefault()
+  $("artboard").style.outline = ""
+  const f = e.dataTransfer.files[0]
+  if (f)
+  {
+    $("file").files = e.dataTransfer.files
+    $("file").dispatchEvent(new Event("change"))
+  }
+}
+
+// Section: Initialization
+$("previewImage").src = state.imageURL
+setBackground(gradient(state.colors))
+renderPalette()
+renderPresets()
+updateDevice()
+update()
+</script>
+</body>
+</html>
